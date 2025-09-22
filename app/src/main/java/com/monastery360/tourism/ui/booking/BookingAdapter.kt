@@ -2,9 +2,12 @@ package com.monastery360.tourism.ui.booking
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.monastery360.tourism.R
 import com.monastery360.tourism.data.Booking
 import com.monastery360.tourism.data.BookingStatus
 import com.monastery360.tourism.databinding.ItemBookingBinding
@@ -35,33 +38,74 @@ class BookingAdapter(
 
         fun bind(booking: Booking) {
             binding.apply {
+                // Load monastery image
+                Glide.with(binding.root.context)
+                    .load(booking.monasteryImageUrl)
+                    .placeholder(R.drawable.placeholder_monastery)
+                    .error(R.drawable.placeholder_monastery)
+                    .centerCrop()
+                    .into(monasteryImage)
+
+                // Set basic info
                 monasteryName.text = booking.monasteryName
+                monasteryLocation.text = booking.monasteryLocation
                 visitorName.text = booking.visitorName
-                groupSize.text = "Group: ${booking.groupSize}"
+                ticketType.text = booking.ticketType
                 
-                val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                bookingDate.text = formatter.format(booking.date)
+                // Format and set price
+                priceText.text = String.format("€%.2f", booking.totalPrice)
                 
-                val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
-                bookingTime.text = timeFormatter.format(booking.date)
+                // Format and set date
+                val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                bookingDate.text = dateFormatter.format(booking.date)
                 
-                // Set status color and text
+                // Set time
+                bookingTime.text = booking.time
+                
+                // Set group size and duration
+                groupSize.text = "${booking.groupSize} ${if (booking.groupSize == 1) "person" else "people"}"
+                duration.text = "${booking.duration} min"
+                
+                // Set booking ID
+                bookingId.text = booking.id
+                
+                // Set status chip
                 when (booking.status) {
                     BookingStatus.PENDING -> {
-                        statusText.text = "Pending"
-                        statusText.setTextColor(binding.root.context.getColor(android.R.color.holo_orange_dark))
+                        statusChip.text = "PENDING"
+                        statusChip.chipBackgroundColor = ContextCompat.getColorStateList(
+                            binding.root.context, R.color.warning_light
+                        )
+                        statusChip.setTextColor(ContextCompat.getColor(
+                            binding.root.context, R.color.warning_dark
+                        ))
                     }
                     BookingStatus.CONFIRMED -> {
-                        statusText.text = "Confirmed"
-                        statusText.setTextColor(binding.root.context.getColor(android.R.color.holo_green_dark))
+                        statusChip.text = "CONFIRMED"
+                        statusChip.chipBackgroundColor = ContextCompat.getColorStateList(
+                            binding.root.context, R.color.success_light
+                        )
+                        statusChip.setTextColor(ContextCompat.getColor(
+                            binding.root.context, R.color.success_dark
+                        ))
                     }
                     BookingStatus.CANCELLED -> {
-                        statusText.text = "Cancelled"
-                        statusText.setTextColor(binding.root.context.getColor(android.R.color.holo_red_dark))
+                        statusChip.text = "CANCELLED"
+                        statusChip.chipBackgroundColor = ContextCompat.getColorStateList(
+                            binding.root.context, R.color.error_light
+                        )
+                        statusChip.setTextColor(ContextCompat.getColor(
+                            binding.root.context, R.color.error_dark
+                        ))
                     }
                     BookingStatus.COMPLETED -> {
-                        statusText.text = "Completed"
-                        statusText.setTextColor(binding.root.context.getColor(android.R.color.holo_blue_dark))
+                        statusChip.text = "COMPLETED"
+                        statusChip.chipBackgroundColor = ContextCompat.getColorStateList(
+                            binding.root.context, R.color.info_light
+                        )
+                        statusChip.setTextColor(ContextCompat.getColor(
+                            binding.root.context, R.color.info_dark
+                        ))
                     }
                 }
 

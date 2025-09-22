@@ -8,10 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.monastery360.tourism.R
 import com.monastery360.tourism.data.Booking
-import com.monastery360.tourism.data.BookingRepository
+import com.monastery360.tourism.data.BookingStatus
 import com.monastery360.tourism.data.MonasteryRepository
 import com.monastery360.tourism.databinding.FragmentBookingBinding
 import java.text.SimpleDateFormat
@@ -22,6 +23,7 @@ class BookingFragment : Fragment() {
     private var _binding: FragmentBookingBinding? = null
     private val binding get() = _binding!!
     private lateinit var bookingAdapter: BookingAdapter
+    private lateinit var bookingViewModel: BookingViewModel
     private var selectedDate: Date? = null
     private var selectedMonasteryId: Int = 1
 
@@ -37,10 +39,16 @@ class BookingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        // Initialize ViewModel
+        bookingViewModel = ViewModelProvider(this)[BookingViewModel::class.java]
+        
         setupUI()
         setupRecyclerView()
         setupClickListeners()
-        loadBookings()
+        observeBookings()
+        
+        // Add sample bookings if none exist (for testing)
+        bookingViewModel.addSampleBookings()
     }
 
     private fun setupUI() {
@@ -151,11 +159,15 @@ class BookingFragment : Fragment() {
 
         val monastery = MonasteryRepository.getMonasteries().find { it.id == selectedMonasteryId }
         val monasteryName = monastery?.name ?: "Unknown Monastery"
+        val monasteryLocation = monastery?.location ?: "Unknown Location"
+        val monasteryImageUrl = monastery?.imageUrl ?: ""
 
         val booking = Booking(
-            id = UUID.randomUUID().toString(),
+            id = "BK-${System.currentTimeMillis()}",
             monasteryId = selectedMonasteryId,
             monasteryName = monasteryName,
+            monasteryLocation = monasteryLocation,
+            monasteryImageUrl = monasteryImageUrl,
             date = selectedDate!!,
             time = "10:00", // Default time
             duration = 120, // 2 hours
@@ -164,11 +176,12 @@ class BookingFragment : Fragment() {
             visitorPhone = visitorPhone,
             groupSize = groupSize,
             specialRequests = if (specialRequests.isEmpty()) null else specialRequests,
-            status = com.monastery360.tourism.data.BookingStatus.PENDING
+            status = BookingStatus.PENDING,
+            totalPrice = groupSize * 25.0, // €25 per person
+            ticketType = "Standard Visit"
         )
 
-        BookingRepository.addBooking(booking)
-        loadBookings()
+        bookingViewModel.insertBooking(booking)
         
         // Clear form
         clearForm()
@@ -186,25 +199,26 @@ class BookingFragment : Fragment() {
         }
     }
 
-    private fun loadBookings() {
-        val bookings = BookingRepository.getBookings()
-        bookingAdapter.submitList(bookings)
-        
-        if (bookings.isEmpty()) {
-            binding.emptyStateLayout.visibility = View.VISIBLE
-            binding.recyclerView.visibility = View.GONE
-        } else {
-            binding.emptyStateLayout.visibility = View.GONE
-            binding.recyclerView.visibility = View.VISIBLE
+    private fun observeBookings() {
+        bookingViewModel.allBookings.observe(viewLifecycleOwner) { bookings ->
+            bookingAdapter.submitList(bookings)
+            
+            if (bookings.isEmpty()) {
+                binding.emptyStateLayout.visibility = View.VISIBLE
+                binding.recyclerView.visibility = View.GONE
+            } else {
+                binding.emptyStateLayout.visibility = View.GONE
+                binding.recyclerView.visibility = View.VISIBLE
+            }
         }
     }
 
     private fun showBookingDetails(booking: Booking) {
         val statusText = when (booking.status) {
-            com.monastery360.tourism.data.BookingStatus.PENDING -> "Pending"
-            com.monastery360.tourism.data.BookingStatus.CONFIRMED -> "Confirmed"
-            com.monastery360.tourism.data.BookingStatus.CANCELLED -> "Cancelled"
-            com.monastery360.tourism.data.BookingStatus.COMPLETED -> "Completed"
+            BookingStatus.PENDING -> "Pending"
+            BookingStatus.CONFIRMED -> "Confirmed"
+            BookingStatus.CANCELLED -> "Cancelled"
+            BookingStatus.COMPLETED -> "Completed"
         }
 
         val formatter = SimpleDateFormat("MMM dd, yyyy 'at' HH:mm", Locale.getDefault())

@@ -225,13 +225,13 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Bookings List -->
+        <!-- My Bookings List -->
         <TextView
             android:id="@+id/bookings_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="Your Bookings"
+            android:text="My Bookings"
             android:textColor="@color/text_primary"
             android:textSize="20sp"
             android:textStyle="bold"

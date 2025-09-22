@@ -1,26 +1,44 @@
 package com.monastery360.tourism.data
 
+import android.content.Context
+import androidx.lifecycle.LiveData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.*
 
-object BookingRepository {
-    private val bookings = mutableListOf<Booking>()
+class BookingRepository(context: Context) {
+    private val bookingDao = BookingDatabase.getDatabase(context).bookingDao()
     
-    fun getBookings(): List<Booking> = bookings.toList()
+    fun getAllBookings(): LiveData<List<Booking>> = bookingDao.getAllBookings()
     
-    fun addBooking(booking: Booking) {
-        bookings.add(booking)
+    fun getBookingsByStatus(status: BookingStatus): LiveData<List<Booking>> = 
+        bookingDao.getBookingsByStatus(status)
+    
+    fun getBookingsByMonastery(monasteryId: Int): LiveData<List<Booking>> = 
+        bookingDao.getBookingsByMonastery(monasteryId)
+    
+    suspend fun addBooking(booking: Booking) = withContext(Dispatchers.IO) {
+        bookingDao.insertBooking(booking)
     }
     
-    fun getBookingById(id: String): Booking? {
-        return bookings.find { it.id == id }
+    suspend fun getBookingById(id: String): Booking? = withContext(Dispatchers.IO) {
+        bookingDao.getBookingById(id)
     }
     
-    fun updateBookingStatus(id: String, status: BookingStatus) {
-        val booking = bookings.find { it.id == id }
-        booking?.let {
-            val index = bookings.indexOf(it)
-            bookings[index] = it.copy(status = status)
-        }
+    suspend fun updateBooking(booking: Booking) = withContext(Dispatchers.IO) {
+        bookingDao.updateBooking(booking)
+    }
+    
+    suspend fun updateBookingStatus(id: String, status: BookingStatus) = withContext(Dispatchers.IO) {
+        bookingDao.updateBookingStatus(id, status)
+    }
+    
+    suspend fun deleteBooking(booking: Booking) = withContext(Dispatchers.IO) {
+        bookingDao.deleteBooking(booking)
+    }
+    
+    suspend fun deleteBookingById(id: String) = withContext(Dispatchers.IO) {
+        bookingDao.deleteBookingById(id)
     }
     
     fun getTimeSlots(date: Date): List<TimeSlot> {

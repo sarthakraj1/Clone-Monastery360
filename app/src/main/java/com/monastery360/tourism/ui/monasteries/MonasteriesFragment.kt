@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import android.content.Intent
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.monastery360.tourism.R
 import com.monastery360.tourism.data.MonasteryRepository
@@ -34,8 +35,10 @@ class MonasteriesFragment : Fragment() {
 
     private fun setupRecyclerView() {
         monasteryAdapter = MonasteryAdapter { monastery ->
-            // Handle monastery click - could open details or 3D view
-            // For now, we'll just show a toast or navigate to details
+            val intent = Intent(requireContext(), MonasteryGalleryActivity::class.java)
+            intent.putExtra(MonasteryGalleryActivity.EXTRA_MONASTERY_ID, monastery.id)
+            intent.putExtra(MonasteryGalleryActivity.EXTRA_MONASTERY_NAME, monastery.name)
+            startActivity(intent)
         }
         
         binding.recyclerView.apply {

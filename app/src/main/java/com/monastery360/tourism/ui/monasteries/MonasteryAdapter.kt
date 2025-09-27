@@ -46,10 +46,9 @@ class MonasteryAdapter(
                     .centerCrop()
                     .into(monasteryImage)
 
-                // Set click listener
-                root.setOnClickListener {
-                    onItemClick(monastery)
-                }
+                // Set click listeners
+                root.setOnClickListener { onItemClick(monastery) }
+                btnViewDetails.setOnClickListener { onItemClick(monastery) }
             }
         }
     }

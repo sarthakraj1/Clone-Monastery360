@@ -11,6 +11,7 @@ import com.monastery360.tourism.ui.booking.BookingFragment
 import com.monastery360.tourism.ui.home.HomeFragment
 import com.monastery360.tourism.ui.info.InfoFragment
 import com.monastery360.tourism.ui.monasteries.MonasteriesFragment
+import com.monastery360.tourism.ui.cultural.CulturalCalendarFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -64,6 +65,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.nav_info -> {
                     replaceFragment(InfoFragment())
+                    true
+                }
+                R.id.nav_cultural -> {
+                    replaceFragment(CulturalCalendarFragment())
                     true
                 }
                 else -> false

@@ -16,4 +16,9 @@
         android:id="@+id/nav_info"
         android:icon="@drawable/ic_info"
         android:title="@string/nav_info" />
+
+    <item
+        android:id="@+id/nav_cultural"
+        android:icon="@drawable/ic_calendar"
+        android:title="@string/nav_cultural" />
 </menu>
